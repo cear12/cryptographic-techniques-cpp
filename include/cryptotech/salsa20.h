@@ -19,9 +19,9 @@ public:
     using Key = std::array<std::uint8_t, 32>;
     using Nonce = std::array<std::uint8_t, 8>;
 
-    static std::vector<std::uint8_t> encrypt(const std::vector<std::uint8_t>& plaintext, const Key& key,
+    static std::vector<std::uint8_t> Encrypt(const std::vector<std::uint8_t>& plaintext, const Key& key,
                                               const Nonce& nonce);
-    static std::vector<std::uint8_t> decrypt(const std::vector<std::uint8_t>& ciphertext, const Key& key,
+    static std::vector<std::uint8_t> Decrypt(const std::vector<std::uint8_t>& ciphertext, const Key& key,
                                               const Nonce& nonce);
 };
 

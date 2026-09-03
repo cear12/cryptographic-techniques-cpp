@@ -27,15 +27,15 @@ public:
 
     explicit Aes128(const Key& key);
 
-    Block encryptBlock(const Block& plaintext) const;
-    Block decryptBlock(const Block& ciphertext) const;
+    Block EncryptBlock(const Block& plaintext) const;
+    Block DecryptBlock(const Block& ciphertext) const;
 
 private:
     static constexpr int kRounds = 10;
     // 4 words/round-key * (Nr+1) round keys, 4 bytes/word.
-    std::array<std::uint8_t, 4 * 4 * (kRounds + 1)> roundKeys_{};
+    std::array<std::uint8_t, 4 * 4 * (kRounds + 1)> round_keys_{};
 
-    void expandKey(const Key& key);
+    void ExpandKey(const Key& key);
 };
 
 }  // namespace cryptotech

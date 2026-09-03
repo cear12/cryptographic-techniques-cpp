@@ -19,57 +19,57 @@ namespace {
 // user-facing output, so a regression fails loudly at startup instead of
 // silently producing plausible-looking wrong numbers further down. See each
 // module's header comment for where these vectors come from.
-bool run_startup_self_checks() {
-    bool allPassed = true;
+bool RunStartupSelfChecks() {
+    bool all_passed = true;
     auto check = [&](const char* name, bool passed) {
         std::cout << "   [" << (passed ? "PASS" : "FAIL") << "] " << name << "\n";
-        allPassed = allPassed && passed;
+        all_passed = all_passed && passed;
     };
 
     // AES-128, FIPS-197 Appendix B known-answer test.
-    cryptotech::Aes128::Key aesKey = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+    cryptotech::Aes128::Key aes_key = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
                                        0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f};
-    cryptotech::Aes128::Block aesPlain = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
+    cryptotech::Aes128::Block aes_plain = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
                                            0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff};
-    cryptotech::Aes128::Block aesExpected = {0x69, 0xc4, 0xe0, 0xd8, 0x6a, 0x7b, 0x04, 0x30,
+    cryptotech::Aes128::Block aes_expected = {0x69, 0xc4, 0xe0, 0xd8, 0x6a, 0x7b, 0x04, 0x30,
                                               0xd8, 0xcd, 0xb7, 0x80, 0x70, 0xb4, 0xc5, 0x5a};
-    cryptotech::Aes128 aes(aesKey);
-    auto aesCipher = aes.encryptBlock(aesPlain);
-    check("AES-128 (FIPS-197 KAT)", aesCipher == aesExpected && aes.decryptBlock(aesCipher) == aesPlain);
+    cryptotech::Aes128 aes(aes_key);
+    auto aes_cipher = aes.EncryptBlock(aes_plain);
+    check("AES-128 (FIPS-197 KAT)", aes_cipher == aes_expected && aes.DecryptBlock(aes_cipher) == aes_plain);
 
     // SHA-256, empty-string known-answer test.
-    auto shaDigest = cryptotech::Sha256::hash({});
+    auto sha_digest = cryptotech::Sha256::Hash({});
     check("SHA-256 (empty-string KAT)",
-          cryptotech::Sha256::toHex(shaDigest) == "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
+          cryptotech::Sha256::ToHex(sha_digest) == "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
 
     // Salsa20, ECRYPT test_vectors.256 Set 1 vector #0 known-answer test.
-    Salsa20::Key salsaKey{};
-    salsaKey[0] = 0x80;
-    Salsa20::Nonce salsaNonce{};
-    auto keystream = Salsa20::encrypt(std::vector<std::uint8_t>(64, 0x00), salsaKey, salsaNonce);
-    std::string keystreamHex;
+    Salsa20::Key salsa_key{};
+    salsa_key[0] = 0x80;
+    Salsa20::Nonce salsa_nonce{};
+    auto keystream = Salsa20::Encrypt(std::vector<std::uint8_t>(64, 0x00), salsa_key, salsa_nonce);
+    std::string keystream_hex;
     for (auto b : keystream) {
         static const char* hex = "0123456789abcdef";
-        keystreamHex += hex[b >> 4];
-        keystreamHex += hex[b & 0x0F];
+        keystream_hex += hex[b >> 4];
+        keystream_hex += hex[b & 0x0F];
     }
     check("Salsa20 (ECRYPT KAT)",
-          keystreamHex == "e3be8fdd8beca2e3ea8ef9475b29a6e7003951e1097a5c38d23b7a5fad9f6844b22c97559e2723c7cbbd3fe4fc8d9a0744652a83e72a9c461876af4d7ef1a117");
+          keystream_hex == "e3be8fdd8beca2e3ea8ef9475b29a6e7003951e1097a5c38d23b7a5fad9f6844b22c97559e2723c7cbbd3fe4fc8d9a0744652a83e72a9c461876af4d7ef1a117");
 
     // Feistel network round-trip (structural correctness -- see
     // feistel_cipher.cpp for why the same round function undoes itself).
-    std::vector<std::uint8_t> feistelKey = {0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF,
+    std::vector<std::uint8_t> feistel_key = {0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF,
                                              0xFE, 0xDC, 0xBA, 0x98, 0x76, 0x54, 0x32, 0x10};
-    auto feistelSchedule = FeistelCipher::generate_key_schedule(feistelKey);
-    FeistelCipher::Block feistelPlain = {0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF};
-    auto feistelCipher = FeistelCipher::encrypt(feistelPlain, feistelSchedule);
+    auto feistel_schedule = FeistelCipher::GenerateKeySchedule(feistel_key);
+    FeistelCipher::Block feistel_plain = {0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF};
+    auto feistel_cipher = FeistelCipher::Encrypt(feistel_plain, feistel_schedule);
     check("Feistel network (round-trip)",
-          feistelCipher != feistelPlain && FeistelCipher::decrypt(feistelCipher, feistelSchedule) == feistelPlain);
+          feistel_cipher != feistel_plain && FeistelCipher::Decrypt(feistel_cipher, feistel_schedule) == feistel_plain);
 
-    return allPassed;
+    return all_passed;
 }
 
-void demonstrate_historical_ciphers() {
+void DemonstrateHistoricalCiphers() {
     std::cout << "\n" << std::string(60, '=') << "\n";
     std::cout << "HISTORICAL CIPHERS - Foundation of Modern Cryptography\n";
     std::cout << std::string(60, '=') << "\n";
@@ -80,8 +80,8 @@ void demonstrate_historical_ciphers() {
 
     std::string message = "ATTACK AT DAWN";
     int shift = 3;
-    auto encrypted = CaesarCipher::encrypt(message, shift);
-    auto decrypted = CaesarCipher::decrypt(encrypted, shift);
+    auto encrypted = CaesarCipher::Encrypt(message, shift);
+    auto decrypted = CaesarCipher::Decrypt(encrypted, shift);
 
     std::cout << "   Original:  " << message << "\n";
     std::cout << "   Shift " << shift << ":   " << encrypted << "\n";
@@ -91,9 +91,9 @@ void demonstrate_historical_ciphers() {
     std::cout << "   Technique: Each letter replaced by another letter\n";
     std::cout << "   Security: Vulnerable to frequency analysis\n\n";
 
-    auto sub_key = SubstitutionCipher::generate_key();
-    auto sub_encrypted = SubstitutionCipher::encrypt(message, sub_key);
-    auto sub_decrypted = SubstitutionCipher::decrypt(sub_encrypted, sub_key);
+    auto sub_key = SubstitutionCipher::GenerateKey();
+    auto sub_encrypted = SubstitutionCipher::Encrypt(message, sub_key);
+    auto sub_decrypted = SubstitutionCipher::Decrypt(sub_encrypted, sub_key);
 
     std::cout << "   Original:  " << message << "\n";
     std::cout << "   Encrypted: " << sub_encrypted << "\n";
@@ -104,8 +104,8 @@ void demonstrate_historical_ciphers() {
     std::cout << "   Security: Broken by Kasiski examination and frequency analysis\n\n";
 
     std::string key = "CRYPTO";
-    auto vig_encrypted = VigenereCipher::encrypt(message, key);
-    auto vig_decrypted = VigenereCipher::decrypt(vig_encrypted, key);
+    auto vig_encrypted = VigenereCipher::Encrypt(message, key);
+    auto vig_decrypted = VigenereCipher::Decrypt(vig_encrypted, key);
 
     std::cout << "   Original:  " << message << "\n";
     std::cout << "   Key:       " << key << "\n";
@@ -113,7 +113,7 @@ void demonstrate_historical_ciphers() {
     std::cout << "   Decrypted: " << vig_decrypted << "\n";
 }
 
-void demonstrate_perfect_security() {
+void DemonstratePerfectSecurity() {
     std::cout << "\n" << std::string(60, '=') << "\n";
     std::cout << "PERFECT SECURITY - One-Time Pad\n";
     std::cout << std::string(60, '=') << "\n";
@@ -126,9 +126,9 @@ void demonstrate_perfect_security() {
     std::string message = "TOP SECRET MESSAGE";
     std::vector<uint8_t> plaintext(message.begin(), message.end());
 
-    auto key = OneTimePad::generate_key(plaintext.size());
-    auto encrypted = OneTimePad::encrypt(plaintext, key);
-    auto decrypted = OneTimePad::decrypt(encrypted, key);
+    auto key = OneTimePad::GenerateKey(plaintext.size());
+    auto encrypted = OneTimePad::Encrypt(plaintext, key);
+    auto decrypted = OneTimePad::Decrypt(encrypted, key);
 
     std::cout << "   Original:  " << message << "\n";
     std::cout << "   Key size:  " << key.size() << " bytes (same as message)\n";
@@ -146,7 +146,7 @@ void demonstrate_perfect_security() {
     std::cout << "      Reusing the key breaks the security completely.\n";
 }
 
-void demonstrate_modern_structures() {
+void DemonstrateModernStructures() {
     std::cout << "\n" << std::string(60, '=') << "\n";
     std::cout << "MODERN CIPHER STRUCTURES\n";
     std::cout << std::string(60, '=') << "\n";
@@ -161,14 +161,14 @@ void demonstrate_modern_structures() {
         0xFE, 0xDC, 0xBA, 0x98, 0x76, 0x54, 0x32, 0x10
     };
 
-    auto key_schedule = FeistelCipher::generate_key_schedule(master_key);
+    auto key_schedule = FeistelCipher::GenerateKeySchedule(master_key);
 
     FeistelCipher::Block plaintext = {
         0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF
     };
 
-    auto encrypted = FeistelCipher::encrypt(plaintext, key_schedule);
-    auto decrypted = FeistelCipher::decrypt(encrypted, key_schedule);
+    auto encrypted = FeistelCipher::Encrypt(plaintext, key_schedule);
+    auto decrypted = FeistelCipher::Decrypt(encrypted, key_schedule);
 
     std::cout << "   Plaintext:  ";
     for (auto byte : plaintext) std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)byte << " ";
@@ -179,7 +179,7 @@ void demonstrate_modern_structures() {
     std::cout << std::dec << "\n   Perfect decryption: " << (plaintext == decrypted ? "YES" : "NO") << "\n";
 }
 
-void demonstrate_stream_cipher() {
+void DemonstrateStreamCipher() {
     std::cout << "\n" << std::string(60, '=') << "\n";
     std::cout << "MODERN STREAM CIPHER - Salsa20\n";
     std::cout << std::string(60, '=') << "\n";
@@ -200,8 +200,8 @@ void demonstrate_stream_cipher() {
     std::string message = "This is a modern stream cipher demonstration!";
     std::vector<uint8_t> plaintext(message.begin(), message.end());
 
-    auto encrypted = Salsa20::encrypt(plaintext, key, nonce);
-    auto decrypted = Salsa20::decrypt(encrypted, key, nonce);
+    auto encrypted = Salsa20::Encrypt(plaintext, key, nonce);
+    auto decrypted = Salsa20::Decrypt(encrypted, key, nonce);
 
     std::cout << "   Original:  " << message << "\n";
     std::cout << "   Key size:  " << key.size() << " bytes\n";
@@ -216,7 +216,7 @@ void demonstrate_stream_cipher() {
     std::cout << "\n";
 }
 
-void demonstrate_salt_techniques() {
+void DemonstrateSaltTechniques() {
     std::cout << "\n" << std::string(60, '=') << "\n";
     std::cout << "SALT TECHNIQUES - Rainbow Table Protection\n";
     std::cout << std::string(60, '=') << "\n";
@@ -229,41 +229,41 @@ void demonstrate_salt_techniques() {
     std::string password1 = "password123";
     std::string password2 = "password123";
 
-    auto hash1 = SaltTechniques::hash_password(password1);
-    auto hash2 = SaltTechniques::hash_password(password2);
+    auto hash1 = SaltTechniques::HashPassword(password1);
+    auto hash2 = SaltTechniques::HashPassword(password2);
 
     std::cout << "   Same passwords with different salts:\n";
     std::cout << "   Password 1: " << password1 << "\n";
     std::cout << "   Salt 1:     ";
-    for (size_t i = 0; i < std::min(hash1.salt.size(), size_t(8)); ++i) {
-        std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)hash1.salt[i] << " ";
+    for (size_t i = 0; i < std::min(hash1.salt_.size(), size_t(8)); ++i) {
+        std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)hash1.salt_[i] << " ";
     }
     std::cout << std::dec << "...\n   Hash 1:     ";
-    for (size_t i = 0; i < std::min(hash1.hash.size(), size_t(8)); ++i) {
-        std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)hash1.hash[i] << " ";
+    for (size_t i = 0; i < std::min(hash1.hash_.size(), size_t(8)); ++i) {
+        std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)hash1.hash_[i] << " ";
     }
 
     std::cout << std::dec << "\n\n   Password 2: " << password2 << "\n";
     std::cout << "   Salt 2:     ";
-    for (size_t i = 0; i < std::min(hash2.salt.size(), size_t(8)); ++i) {
-        std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)hash2.salt[i] << " ";
+    for (size_t i = 0; i < std::min(hash2.salt_.size(), size_t(8)); ++i) {
+        std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)hash2.salt_[i] << " ";
     }
     std::cout << std::dec << "...\n   Hash 2:     ";
-    for (size_t i = 0; i < std::min(hash2.hash.size(), size_t(8)); ++i) {
-        std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)hash2.hash[i] << " ";
+    for (size_t i = 0; i < std::min(hash2.hash_.size(), size_t(8)); ++i) {
+        std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)hash2.hash_[i] << " ";
     }
     std::cout << std::dec << "\n\n   Same passwords produce DIFFERENT hashes: "
-              << (hash1.hash != hash2.hash ? "YES (as expected)" : "NO (BUG)") << "\n";
-    std::cout << "   Iterations: " << hash1.iterations << " (prevents brute force)\n";
+              << (hash1.hash_ != hash2.hash_ ? "YES (as expected)" : "NO (BUG)") << "\n";
+    std::cout << "   Iterations: " << hash1.iterations_ << " (prevents brute force)\n";
 
-    bool correct = SaltTechniques::verify_password(password1, hash1);
-    bool incorrect = SaltTechniques::verify_password("wrongpassword", hash1);
+    bool correct = SaltTechniques::VerifyPassword(password1, hash1);
+    bool incorrect = SaltTechniques::VerifyPassword("wrongpassword", hash1);
 
     std::cout << "   Correct password verification: " << (correct ? "PASS" : "FAIL") << "\n";
     std::cout << "   Wrong password verification:   " << (incorrect ? "FAIL" : "PASS") << "\n";
 }
 
-void demonstrate_iv_and_nonce() {
+void DemonstrateIvAndNonce() {
     std::cout << "\n" << std::string(60, '=') << "\n";
     std::cout << "IV AND NONCE TECHNIQUES - Preventing Pattern Analysis\n";
     std::cout << std::string(60, '=') << "\n";
@@ -277,70 +277,70 @@ void demonstrate_iv_and_nonce() {
     std::vector<uint8_t> plaintext(message.begin(), message.end());
     std::vector<uint8_t> key(32, 0x42);  // arbitrary-length "dummy key"; reduced to AES-128 size internally (see block_cipher_modes.cpp)
 
-    auto cbc_result1 = IVandNonceTechniques::encrypt_cbc_with_iv(plaintext, key);
-    auto cbc_result2 = IVandNonceTechniques::encrypt_cbc_with_iv(plaintext, key);
+    auto cbc_result1 = IVandNonceTechniques::EncryptCbcWithIv(plaintext, key);
+    auto cbc_result2 = IVandNonceTechniques::EncryptCbcWithIv(plaintext, key);
 
     std::cout << "   CBC MODE WITH IV (AES-128):\n";
     std::cout << "   Same message encrypted twice with different IVs:\n";
     std::cout << "   IV 1:  ";
-    for (size_t i = 0; i < std::min(cbc_result1.iv_or_nonce.size(), size_t(8)); ++i) {
-        std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)cbc_result1.iv_or_nonce[i] << " ";
+    for (size_t i = 0; i < std::min(cbc_result1.iv_or_nonce_.size(), size_t(8)); ++i) {
+        std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)cbc_result1.iv_or_nonce_[i] << " ";
     }
     std::cout << std::dec << "...\n   CT 1:  ";
-    for (size_t i = 0; i < std::min(cbc_result1.ciphertext.size(), size_t(8)); ++i) {
-        std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)cbc_result1.ciphertext[i] << " ";
+    for (size_t i = 0; i < std::min(cbc_result1.ciphertext_.size(), size_t(8)); ++i) {
+        std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)cbc_result1.ciphertext_[i] << " ";
     }
 
     std::cout << std::dec << "\n   IV 2:  ";
-    for (size_t i = 0; i < std::min(cbc_result2.iv_or_nonce.size(), size_t(8)); ++i) {
-        std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)cbc_result2.iv_or_nonce[i] << " ";
+    for (size_t i = 0; i < std::min(cbc_result2.iv_or_nonce_.size(), size_t(8)); ++i) {
+        std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)cbc_result2.iv_or_nonce_[i] << " ";
     }
     std::cout << std::dec << "...\n   CT 2:  ";
-    for (size_t i = 0; i < std::min(cbc_result2.ciphertext.size(), size_t(8)); ++i) {
-        std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)cbc_result2.ciphertext[i] << " ";
+    for (size_t i = 0; i < std::min(cbc_result2.ciphertext_.size(), size_t(8)); ++i) {
+        std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)cbc_result2.ciphertext_[i] << " ";
     }
     std::cout << std::dec << "\n   Different ciphertexts from same plaintext: "
-              << (cbc_result1.ciphertext != cbc_result2.ciphertext ? "YES" : "NO (BUG)") << "\n";
+              << (cbc_result1.ciphertext_ != cbc_result2.ciphertext_ ? "YES" : "NO (BUG)") << "\n";
 
-    auto cbc_roundtrip = IVandNonceTechniques::decrypt_cbc_with_iv(cbc_result1, key);
+    auto cbc_roundtrip = IVandNonceTechniques::DecryptCbcWithIv(cbc_result1, key);
     std::string cbc_roundtrip_str(cbc_roundtrip.begin(), cbc_roundtrip.end());
     std::cout << "   CBC round-trip decrypts correctly: " << (cbc_roundtrip_str == message ? "YES" : "NO (BUG)") << "\n";
 
-    auto ctr_result = IVandNonceTechniques::encrypt_ctr_with_nonce(plaintext, key);
+    auto ctr_result = IVandNonceTechniques::EncryptCtrWithNonce(plaintext, key);
     std::cout << "\n   CTR MODE WITH NONCE (AES-128):\n";
     std::cout << "   Nonce: ";
-    for (size_t i = 0; i < std::min(ctr_result.iv_or_nonce.size(), size_t(8)); ++i) {
-        std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)ctr_result.iv_or_nonce[i] << " ";
+    for (size_t i = 0; i < std::min(ctr_result.iv_or_nonce_.size(), size_t(8)); ++i) {
+        std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)ctr_result.iv_or_nonce_[i] << " ";
     }
     std::cout << std::dec << "...\n   Advantage: No padding needed, parallelizable\n";
-    auto ctr_roundtrip = IVandNonceTechniques::decrypt_ctr_with_nonce(ctr_result, key);
+    auto ctr_roundtrip = IVandNonceTechniques::DecryptCtrWithNonce(ctr_result, key);
     std::string ctr_roundtrip_str(ctr_roundtrip.begin(), ctr_roundtrip.end());
     std::cout << "   CTR round-trip decrypts correctly: " << (ctr_roundtrip_str == message ? "YES" : "NO (BUG)") << "\n";
 
     std::vector<uint8_t> associated_data = {'A', 'D'};
-    auto gcm_result = IVandNonceTechniques::encrypt_gcm_with_nonce(plaintext, key, associated_data);
+    auto gcm_result = IVandNonceTechniques::EncryptGcmWithNonce(plaintext, key, associated_data);
     std::cout << "\n   GCM-STYLE AUTHENTICATED ENCRYPTION (AES-128-CTR + HMAC-SHA256, see README):\n";
     std::cout << "   Provides both confidentiality AND authenticity\n";
     std::cout << "   Tag: ";
-    for (size_t i = 0; i < std::min(gcm_result.tag.size(), size_t(8)); ++i) {
-        std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)gcm_result.tag[i] << " ";
+    for (size_t i = 0; i < std::min(gcm_result.tag_.size(), size_t(8)); ++i) {
+        std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)gcm_result.tag_[i] << " ";
     }
     std::cout << std::dec << "...\n";
-    auto gcm_roundtrip = IVandNonceTechniques::decrypt_gcm_with_nonce(gcm_result, key, associated_data);
+    auto gcm_roundtrip = IVandNonceTechniques::DecryptGcmWithNonce(gcm_result, key, associated_data);
     std::string gcm_roundtrip_str(gcm_roundtrip.begin(), gcm_roundtrip.end());
     std::cout << "   Round-trip decrypts correctly: " << (gcm_roundtrip_str == message ? "YES" : "NO (BUG)") << "\n";
 
     auto tampered = gcm_result;
-    tampered.ciphertext[0] ^= 0xFF;
+    tampered.ciphertext_[0] ^= 0xFF;
     try {
-        IVandNonceTechniques::decrypt_gcm_with_nonce(tampered, key, associated_data);
+        IVandNonceTechniques::DecryptGcmWithNonce(tampered, key, associated_data);
         std::cout << "   Tamper detection: FAIL (tampered ciphertext decrypted without error!)\n";
     } catch (const std::exception&) {
         std::cout << "   Detects tampering and forgery attempts: YES (tag mismatch correctly rejected)\n";
     }
 }
 
-void demonstrate_key_derivation() {
+void DemonstrateKeyDerivation() {
     std::cout << "\n" << std::string(60, '=') << "\n";
     std::cout << "KEY DERIVATION TECHNIQUES - From Weak to Strong Keys\n";
     std::cout << std::string(60, '=') << "\n";
@@ -351,23 +351,23 @@ void demonstrate_key_derivation() {
 
     std::string weak_password = "password123";
 
-    auto pbkdf2_keys = KeyDerivationTechniques::derive_keys_pbkdf2(weak_password);
+    auto pbkdf2_keys = KeyDerivationTechniques::DeriveKeysPbkdf2(weak_password);
     std::cout << "   PBKDF2 (Most widely supported):\n";
-    std::cout << "   Iterations: " << pbkdf2_keys.iterations << "\n";
+    std::cout << "   Iterations: " << pbkdf2_keys.iterations_ << "\n";
     std::cout << "   Enc Key:   ";
-    for (size_t i = 0; i < 8; ++i) std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)pbkdf2_keys.encryption_key[i] << " ";
+    for (size_t i = 0; i < 8; ++i) std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)pbkdf2_keys.encryption_key_[i] << " ";
     std::cout << std::dec << "...\n   MAC Key:   ";
-    for (size_t i = 0; i < 8; ++i) std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)pbkdf2_keys.mac_key[i] << " ";
+    for (size_t i = 0; i < 8; ++i) std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)pbkdf2_keys.mac_key_[i] << " ";
     std::cout << std::dec << "...\n   Pros: Simple, widely supported\n";
     std::cout << "   Cons: Not memory-hard (ASIC vulnerable)\n";
 
     auto start_time = std::chrono::high_resolution_clock::now();
-    auto scrypt_keys = KeyDerivationTechniques::derive_keys_scrypt(weak_password);
+    auto scrypt_keys = KeyDerivationTechniques::DeriveKeysScrypt(weak_password);
     auto end_time = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
 
     std::cout << "\n   SCRYPT-STYLE (simplified memory-hard KDF, see README):\n";
-    std::cout << "   Cost factor: " << scrypt_keys.iterations << "\n";
+    std::cout << "   Cost factor: " << scrypt_keys.iterations_ << "\n";
     std::cout << "   Time taken: " << duration.count() << " ms\n";
     std::cout << "   Pros: Forces a large in-memory buffer, resisting cheap ASIC/GPU parallelism\n";
     std::cout << "   Cons: More complex, higher memory usage; this repo's version is a simplification of real scrypt\n";
@@ -378,16 +378,16 @@ void demonstrate_key_derivation() {
     };
     std::vector<uint8_t> context_info = {'T', 'L', 'S', '1', '3'};
 
-    auto hkdf_keys = KeyDerivationTechniques::derive_keys_hkdf(shared_secret, context_info);
+    auto hkdf_keys = KeyDerivationTechniques::DeriveKeysHkdf(shared_secret, context_info);
     std::cout << "\n   HKDF (Extract-then-Expand):\n";
     std::cout << "   Use case: Derive multiple keys from shared secret (ECDH)\n";
     std::cout << "   Enc Key:   ";
-    for (size_t i = 0; i < 8; ++i) std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)hkdf_keys.encryption_key[i] << " ";
+    for (size_t i = 0; i < 8; ++i) std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)hkdf_keys.encryption_key_[i] << " ";
     std::cout << std::dec << "...\n   Pros: Efficient, cryptographically sound\n";
     std::cout << "   Cons: Input must already have good entropy\n";
 }
 
-void demonstrate_sbox_design() {
+void DemonstrateSboxDesign() {
     std::cout << "\n" << std::string(60, '=') << "\n";
     std::cout << "S-BOX DESIGN - The Heart of Modern Block Ciphers\n";
     std::cout << std::string(60, '=') << "\n";
@@ -396,18 +396,18 @@ void demonstrate_sbox_design() {
     std::cout << "    Purpose: Provide confusion (hide key-ciphertext relationship)\n";
     std::cout << "    Used in: AES, DES, Blowfish, Twofish, etc.\n\n";
 
-    auto random_sbox = SBoxDesign::generate_random_sbox();
-    auto inverse_sbox = SBoxDesign::create_inverse_sbox(random_sbox);
+    auto random_sbox = SBoxDesign::GenerateRandomSbox();
+    auto inverse_sbox = SBoxDesign::CreateInverseSbox(random_sbox);
 
     std::cout << "   RANDOM S-BOX ANALYSIS:\n";
 
     auto start = std::chrono::high_resolution_clock::now();
-    double nonlinearity = SBoxDesign::calculate_nonlinearity(random_sbox);
+    double nonlinearity = SBoxDesign::CalculateNonlinearity(random_sbox);
     auto end = std::chrono::high_resolution_clock::now();
     auto nl_time = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 
     start = std::chrono::high_resolution_clock::now();
-    int diff_uniformity = SBoxDesign::calculate_differential_uniformity(random_sbox);
+    int diff_uniformity = SBoxDesign::CalculateDifferentialUniformity(random_sbox);
     end = std::chrono::high_resolution_clock::now();
     auto du_time = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 
@@ -444,7 +444,7 @@ void demonstrate_sbox_design() {
               << "\n";
 }
 
-void print_security_summary() {
+void PrintSecuritySummary() {
     std::cout << "\n" << std::string(60, '=') << "\n";
     std::cout << "CRYPTOGRAPHIC SECURITY SUMMARY\n";
     std::cout << std::string(60, '=') << "\n";
@@ -486,22 +486,22 @@ int main() {
     std::cout << "Senior C++ Developer\n\n";
 
     std::cout << "Startup self-checks (known-answer tests):\n";
-    if (!run_startup_self_checks()) {
+    if (!RunStartupSelfChecks()) {
         std::cerr << "\nOne or more startup self-checks FAILED -- aborting rather than showing\n";
         std::cerr << "output built on a primitive that is not working correctly.\n";
         return 1;
     }
 
     try {
-        demonstrate_historical_ciphers();
-        demonstrate_perfect_security();
-        demonstrate_modern_structures();
-        demonstrate_stream_cipher();
-        demonstrate_salt_techniques();
-        demonstrate_iv_and_nonce();
-        demonstrate_key_derivation();
-        demonstrate_sbox_design();
-        print_security_summary();
+        DemonstrateHistoricalCiphers();
+        DemonstratePerfectSecurity();
+        DemonstrateModernStructures();
+        DemonstrateStreamCipher();
+        DemonstrateSaltTechniques();
+        DemonstrateIvAndNonce();
+        DemonstrateKeyDerivation();
+        DemonstrateSboxDesign();
+        PrintSecuritySummary();
 
         std::cout << "\n" << std::string(60, '=') << "\n";
         std::cout << "ALL CRYPTOGRAPHIC TECHNIQUES DEMONSTRATED SUCCESSFULLY\n";

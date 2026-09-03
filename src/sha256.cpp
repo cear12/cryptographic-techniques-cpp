@@ -18,7 +18,7 @@ constexpr std::array<std::uint32_t, 64> kRoundConstants = {
     0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2,
 };
 
-inline std::uint32_t rotr(std::uint32_t x, std::uint32_t n) {
+inline std::uint32_t Rotr(std::uint32_t x, std::uint32_t n) {
     return (x >> n) | (x << (32 - n));
 }
 
@@ -28,7 +28,7 @@ Sha256::Sha256()
     : state_{0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
               0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19} {}
 
-void Sha256::processBlock(const std::uint8_t* block) {
+void Sha256::ProcessBlock(const std::uint8_t* block) {
     std::array<std::uint32_t, 64> w{};
     for (int i = 0; i < 16; ++i) {
         w[i] = (static_cast<std::uint32_t>(block[i * 4]) << 24) |
@@ -37,8 +37,8 @@ void Sha256::processBlock(const std::uint8_t* block) {
                (static_cast<std::uint32_t>(block[i * 4 + 3]));
     }
     for (int i = 16; i < 64; ++i) {
-        std::uint32_t s0 = rotr(w[i - 15], 7) ^ rotr(w[i - 15], 18) ^ (w[i - 15] >> 3);
-        std::uint32_t s1 = rotr(w[i - 2], 17) ^ rotr(w[i - 2], 19) ^ (w[i - 2] >> 10);
+        std::uint32_t s0 = Rotr(w[i - 15], 7) ^ Rotr(w[i - 15], 18) ^ (w[i - 15] >> 3);
+        std::uint32_t s1 = Rotr(w[i - 2], 17) ^ Rotr(w[i - 2], 19) ^ (w[i - 2] >> 10);
         w[i] = w[i - 16] + s0 + w[i - 7] + s1;
     }
 
@@ -52,10 +52,10 @@ void Sha256::processBlock(const std::uint8_t* block) {
     std::uint32_t h = state_[7];
 
     for (int i = 0; i < 64; ++i) {
-        std::uint32_t s1 = rotr(e, 6) ^ rotr(e, 11) ^ rotr(e, 25);
+        std::uint32_t s1 = Rotr(e, 6) ^ Rotr(e, 11) ^ Rotr(e, 25);
         std::uint32_t ch = (e & f) ^ (~e & g);
         std::uint32_t temp1 = h + s1 + ch + kRoundConstants[i] + w[i];
-        std::uint32_t s0 = rotr(a, 2) ^ rotr(a, 13) ^ rotr(a, 22);
+        std::uint32_t s0 = Rotr(a, 2) ^ Rotr(a, 13) ^ Rotr(a, 22);
         std::uint32_t maj = (a & b) ^ (a & c) ^ (b & c);
         std::uint32_t temp2 = s0 + maj;
 
@@ -79,44 +79,44 @@ void Sha256::processBlock(const std::uint8_t* block) {
     state_[7] += h;
 }
 
-void Sha256::update(const std::uint8_t* data, std::size_t length) {
-    totalLength_ += length;
+void Sha256::Update(const std::uint8_t* data, std::size_t length) {
+    total_length_ += length;
 
     while (length > 0) {
-        std::size_t take = std::min(length, buffer_.size() - bufferLength_);
-        std::memcpy(buffer_.data() + bufferLength_, data, take);
-        bufferLength_ += take;
+        std::size_t take = std::min(length, buffer_.size() - buffer_length_);
+        std::memcpy(buffer_.data() + buffer_length_, data, take);
+        buffer_length_ += take;
         data += take;
         length -= take;
 
-        if (bufferLength_ == buffer_.size()) {
-            processBlock(buffer_.data());
-            bufferLength_ = 0;
+        if (buffer_length_ == buffer_.size()) {
+            ProcessBlock(buffer_.data());
+            buffer_length_ = 0;
         }
     }
 }
 
-void Sha256::update(const std::vector<std::uint8_t>& data) {
-    update(data.data(), data.size());
+void Sha256::Update(const std::vector<std::uint8_t>& data) {
+    Update(data.data(), data.size());
 }
 
-Sha256::Digest Sha256::finish() {
-    std::uint64_t bitLength = totalLength_ * 8;
+Sha256::Digest Sha256::Finish() {
+    std::uint64_t bit_length = total_length_ * 8;
 
     std::uint8_t pad = 0x80;
-    update(&pad, 1);
+    Update(&pad, 1);
 
     static constexpr std::uint8_t kZero = 0x00;
-    while (bufferLength_ != 56) {
-        update(&kZero, 1);
+    while (buffer_length_ != 56) {
+        Update(&kZero, 1);
     }
 
-    std::array<std::uint8_t, 8> lengthBytes{};
+    std::array<std::uint8_t, 8> length_bytes{};
     for (int i = 0; i < 8; ++i) {
-        lengthBytes[7 - i] = static_cast<std::uint8_t>(bitLength >> (i * 8));
+        length_bytes[7 - i] = static_cast<std::uint8_t>(bit_length >> (i * 8));
     }
-    std::memcpy(buffer_.data() + bufferLength_, lengthBytes.data(), 8);
-    processBlock(buffer_.data());
+    std::memcpy(buffer_.data() + buffer_length_, length_bytes.data(), 8);
+    ProcessBlock(buffer_.data());
 
     Digest digest{};
     for (int i = 0; i < 8; ++i) {
@@ -128,13 +128,13 @@ Sha256::Digest Sha256::finish() {
     return digest;
 }
 
-Sha256::Digest Sha256::hash(const std::vector<std::uint8_t>& data) {
+Sha256::Digest Sha256::Hash(const std::vector<std::uint8_t>& data) {
     Sha256 sha;
-    sha.update(data);
-    return sha.finish();
+    sha.Update(data);
+    return sha.Finish();
 }
 
-std::string Sha256::toHex(const Digest& digest) {
+std::string Sha256::ToHex(const Digest& digest) {
     static constexpr char kHexChars[] = "0123456789abcdef";
     std::string hex;
     hex.reserve(digest.size() * 2);
@@ -145,32 +145,32 @@ std::string Sha256::toHex(const Digest& digest) {
     return hex;
 }
 
-Sha256::Digest hmacSha256(const std::vector<std::uint8_t>& key, const std::vector<std::uint8_t>& message) {
+Sha256::Digest HmacSha256(const std::vector<std::uint8_t>& key, const std::vector<std::uint8_t>& message) {
     constexpr std::size_t kBlockSize = 64;
 
-    std::vector<std::uint8_t> keyBlock(kBlockSize, 0x00);
+    std::vector<std::uint8_t> key_block(kBlockSize, 0x00);
     if (key.size() > kBlockSize) {
-        auto digest = Sha256::hash(key);
-        std::copy(digest.begin(), digest.end(), keyBlock.begin());
+        auto digest = Sha256::Hash(key);
+        std::copy(digest.begin(), digest.end(), key_block.begin());
     } else {
-        std::copy(key.begin(), key.end(), keyBlock.begin());
+        std::copy(key.begin(), key.end(), key_block.begin());
     }
 
-    std::vector<std::uint8_t> innerPad(kBlockSize), outerPad(kBlockSize);
+    std::vector<std::uint8_t> inner_pad(kBlockSize), outer_pad(kBlockSize);
     for (std::size_t i = 0; i < kBlockSize; ++i) {
-        innerPad[i] = keyBlock[i] ^ 0x36;
-        outerPad[i] = keyBlock[i] ^ 0x5c;
+        inner_pad[i] = key_block[i] ^ 0x36;
+        outer_pad[i] = key_block[i] ^ 0x5c;
     }
 
     Sha256 inner;
-    inner.update(innerPad);
-    inner.update(message);
-    auto innerDigest = inner.finish();
+    inner.Update(inner_pad);
+    inner.Update(message);
+    auto inner_digest = inner.Finish();
 
     Sha256 outer;
-    outer.update(outerPad);
-    outer.update(std::vector<std::uint8_t>(innerDigest.begin(), innerDigest.end()));
-    return outer.finish();
+    outer.Update(outer_pad);
+    outer.Update(std::vector<std::uint8_t>(inner_digest.begin(), inner_digest.end()));
+    return outer.Finish();
 }
 
 }  // namespace cryptotech

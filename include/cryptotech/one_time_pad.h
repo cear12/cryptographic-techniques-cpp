@@ -12,10 +12,10 @@ namespace educational_crypto {
 // any one of those and the "perfect" guarantee disappears completely.
 class OneTimePad {
 public:
-    static std::vector<std::uint8_t> generate_key(std::size_t length);
-    static std::vector<std::uint8_t> encrypt(const std::vector<std::uint8_t>& plaintext,
+    static std::vector<std::uint8_t> GenerateKey(std::size_t length);
+    static std::vector<std::uint8_t> Encrypt(const std::vector<std::uint8_t>& plaintext,
                                               const std::vector<std::uint8_t>& key);
-    static std::vector<std::uint8_t> decrypt(const std::vector<std::uint8_t>& ciphertext,
+    static std::vector<std::uint8_t> Decrypt(const std::vector<std::uint8_t>& ciphertext,
                                               const std::vector<std::uint8_t>& key);
 };
 

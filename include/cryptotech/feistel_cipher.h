@@ -25,9 +25,9 @@ public:
     using Block = std::array<std::uint8_t, 8>;
     using KeySchedule = std::array<std::uint32_t, kRounds>;
 
-    static KeySchedule generate_key_schedule(const std::vector<std::uint8_t>& masterKey);
-    static Block encrypt(const Block& plaintext, const KeySchedule& keySchedule);
-    static Block decrypt(const Block& ciphertext, const KeySchedule& keySchedule);
+    static KeySchedule GenerateKeySchedule(const std::vector<std::uint8_t>& master_key);
+    static Block Encrypt(const Block& plaintext, const KeySchedule& key_schedule);
+    static Block Decrypt(const Block& ciphertext, const KeySchedule& key_schedule);
 };
 
 }  // namespace educational_crypto

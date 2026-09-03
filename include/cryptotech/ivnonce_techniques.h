@@ -16,33 +16,33 @@ using EncryptionResult = cryptotech::CipherResult;
 
 class IVandNonceTechniques {
 public:
-    static EncryptionResult encrypt_cbc_with_iv(const std::vector<std::uint8_t>& plaintext,
+    static EncryptionResult EncryptCbcWithIv(const std::vector<std::uint8_t>& plaintext,
                                                  const std::vector<std::uint8_t>& key) {
-        return cryptotech::BlockCipherModes::encryptCbcWithIv(plaintext, key);
+        return cryptotech::BlockCipherModes::EncryptCbcWithIv(plaintext, key);
     }
-    static std::vector<std::uint8_t> decrypt_cbc_with_iv(const EncryptionResult& in,
+    static std::vector<std::uint8_t> DecryptCbcWithIv(const EncryptionResult& in,
                                                            const std::vector<std::uint8_t>& key) {
-        return cryptotech::BlockCipherModes::decryptCbcWithIv(in, key);
+        return cryptotech::BlockCipherModes::DecryptCbcWithIv(in, key);
     }
 
-    static EncryptionResult encrypt_ctr_with_nonce(const std::vector<std::uint8_t>& plaintext,
+    static EncryptionResult EncryptCtrWithNonce(const std::vector<std::uint8_t>& plaintext,
                                                     const std::vector<std::uint8_t>& key) {
-        return cryptotech::BlockCipherModes::encryptCtrWithNonce(plaintext, key);
+        return cryptotech::BlockCipherModes::EncryptCtrWithNonce(plaintext, key);
     }
-    static std::vector<std::uint8_t> decrypt_ctr_with_nonce(const EncryptionResult& in,
+    static std::vector<std::uint8_t> DecryptCtrWithNonce(const EncryptionResult& in,
                                                               const std::vector<std::uint8_t>& key) {
-        return cryptotech::BlockCipherModes::decryptCtrWithNonce(in, key);
+        return cryptotech::BlockCipherModes::DecryptCtrWithNonce(in, key);
     }
 
-    static EncryptionResult encrypt_gcm_with_nonce(const std::vector<std::uint8_t>& plaintext,
+    static EncryptionResult EncryptGcmWithNonce(const std::vector<std::uint8_t>& plaintext,
                                                     const std::vector<std::uint8_t>& key,
                                                     const std::vector<std::uint8_t>& associated_data) {
-        return cryptotech::BlockCipherModes::encryptGcmStyle(plaintext, key, associated_data);
+        return cryptotech::BlockCipherModes::EncryptGcmStyle(plaintext, key, associated_data);
     }
-    static std::vector<std::uint8_t> decrypt_gcm_with_nonce(const EncryptionResult& in,
+    static std::vector<std::uint8_t> DecryptGcmWithNonce(const EncryptionResult& in,
                                                               const std::vector<std::uint8_t>& key,
                                                               const std::vector<std::uint8_t>& associated_data) {
-        return cryptotech::BlockCipherModes::decryptGcmStyle(in, key, associated_data);
+        return cryptotech::BlockCipherModes::DecryptGcmStyle(in, key, associated_data);
     }
 };
 

@@ -6,7 +6,7 @@
 
 namespace educational_crypto {
 
-std::vector<std::uint8_t> OneTimePad::generate_key(std::size_t length) {
+std::vector<std::uint8_t> OneTimePad::GenerateKey(std::size_t length) {
     std::random_device rd;
     std::vector<std::uint8_t> key(length);
     std::generate(key.begin(), key.end(), [&] { return static_cast<std::uint8_t>(rd()); });
@@ -14,7 +14,7 @@ std::vector<std::uint8_t> OneTimePad::generate_key(std::size_t length) {
 }
 
 namespace {
-std::vector<std::uint8_t> xorWithKey(const std::vector<std::uint8_t>& data, const std::vector<std::uint8_t>& key) {
+std::vector<std::uint8_t> XorWithKey(const std::vector<std::uint8_t>& data, const std::vector<std::uint8_t>& key) {
     if (data.size() != key.size()) {
         throw std::invalid_argument("OneTimePad: key length must equal message length");
     }
@@ -24,14 +24,14 @@ std::vector<std::uint8_t> xorWithKey(const std::vector<std::uint8_t>& data, cons
 }
 }  // namespace
 
-std::vector<std::uint8_t> OneTimePad::encrypt(const std::vector<std::uint8_t>& plaintext,
+std::vector<std::uint8_t> OneTimePad::Encrypt(const std::vector<std::uint8_t>& plaintext,
                                                const std::vector<std::uint8_t>& key) {
-    return xorWithKey(plaintext, key);
+    return XorWithKey(plaintext, key);
 }
 
-std::vector<std::uint8_t> OneTimePad::decrypt(const std::vector<std::uint8_t>& ciphertext,
+std::vector<std::uint8_t> OneTimePad::Decrypt(const std::vector<std::uint8_t>& ciphertext,
                                                const std::vector<std::uint8_t>& key) {
-    return xorWithKey(ciphertext, key);  // XOR is its own inverse
+    return XorWithKey(ciphertext, key);  // XOR is its own inverse
 }
 
 }  // namespace educational_crypto

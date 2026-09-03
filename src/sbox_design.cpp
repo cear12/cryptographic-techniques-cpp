@@ -7,7 +7,7 @@
 
 namespace advanced_crypto {
 
-SBoxDesign::SBox SBoxDesign::generate_random_sbox() {
+SBoxDesign::SBox SBoxDesign::GenerateRandomSbox() {
     SBox sbox{};
     std::iota(sbox.begin(), sbox.end(), 0);
 
@@ -17,7 +17,7 @@ SBoxDesign::SBox SBoxDesign::generate_random_sbox() {
     return sbox;
 }
 
-SBoxDesign::SBox SBoxDesign::create_inverse_sbox(const SBox& sbox) {
+SBoxDesign::SBox SBoxDesign::CreateInverseSbox(const SBox& sbox) {
     SBox inverse{};
     for (int x = 0; x < 256; ++x) {
         inverse[sbox[static_cast<std::size_t>(x)]] = static_cast<std::uint8_t>(x);
@@ -29,7 +29,7 @@ namespace {
 // Parity (0 or 1) of the bitwise AND of a and b, i.e. the dot product of
 // their bit vectors over GF(2). Used to evaluate the "component" linear
 // functions a.F(x) and b.x that the Walsh-Hadamard transform correlates.
-int dotParity(unsigned a, unsigned b) {
+int DotParity(unsigned a, unsigned b) {
     return std::popcount(a & b) & 1;
 }
 
@@ -37,38 +37,38 @@ int dotParity(unsigned a, unsigned b) {
 // over all 256 inputs x. a selects which output-bit combination to look at
 // (must be nonzero -- a=0 is the trivial all-agreeing case); b selects
 // which input-bit combination to correlate it against.
-int walshCoefficient(const SBoxDesign::SBox& sbox, unsigned a, unsigned b) {
+int WalshCoefficient(const SBoxDesign::SBox& sbox, unsigned a, unsigned b) {
     int sum = 0;
     for (unsigned x = 0; x < 256; ++x) {
-        int exponent = dotParity(a, sbox[x]) ^ dotParity(b, x);
+        int exponent = DotParity(a, sbox[x]) ^ DotParity(b, x);
         sum += exponent ? -1 : 1;
     }
     return sum;
 }
 }  // namespace
 
-double SBoxDesign::calculate_nonlinearity(const SBox& sbox) {
-    int maxAbsWalsh = 0;
+double SBoxDesign::CalculateNonlinearity(const SBox& sbox) {
+    int max_abs_walsh = 0;
     for (unsigned a = 1; a < 256; ++a) {          // nonzero output masks only
         for (unsigned b = 0; b < 256; ++b) {      // all input masks
-            maxAbsWalsh = std::max(maxAbsWalsh, std::abs(walshCoefficient(sbox, a, b)));
+            max_abs_walsh = std::max(max_abs_walsh, std::abs(WalshCoefficient(sbox, a, b)));
         }
     }
     // NL(F) = 2^(n-1) - max|W(a,b)| / 2, for n = 8 input bits.
-    return 128.0 - static_cast<double>(maxAbsWalsh) / 2.0;
+    return 128.0 - static_cast<double>(max_abs_walsh) / 2.0;
 }
 
-int SBoxDesign::calculate_differential_uniformity(const SBox& sbox) {
-    int maxCount = 0;
+int SBoxDesign::CalculateDifferentialUniformity(const SBox& sbox) {
+    int max_count = 0;
     for (unsigned dx = 1; dx < 256; ++dx) {
         std::array<int, 256> counts{};
         for (unsigned x = 0; x < 256; ++x) {
             std::uint8_t dy = static_cast<std::uint8_t>(sbox[x] ^ sbox[x ^ dx]);
             ++counts[dy];
         }
-        maxCount = std::max(maxCount, *std::max_element(counts.begin(), counts.end()));
+        max_count = std::max(max_count, *std::max_element(counts.begin(), counts.end()));
     }
-    return maxCount;
+    return max_count;
 }
 
 }  // namespace advanced_crypto

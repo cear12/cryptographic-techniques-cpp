@@ -10,8 +10,8 @@ namespace educational_crypto {
 // through unchanged.
 class CaesarCipher {
 public:
-    static std::string encrypt(const std::string& plaintext, int shift);
-    static std::string decrypt(const std::string& ciphertext, int shift);
+    static std::string Encrypt(const std::string& plaintext, int shift);
+    static std::string Decrypt(const std::string& ciphertext, int shift);
 };
 
 }  // namespace educational_crypto

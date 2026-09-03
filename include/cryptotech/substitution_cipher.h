@@ -14,9 +14,9 @@ public:
     // key[i] is the ciphertext letter substituted for plaintext letter 'A'+i.
     using Key = std::array<char, 26>;
 
-    static Key generate_key();
-    static std::string encrypt(const std::string& plaintext, const Key& key);
-    static std::string decrypt(const std::string& ciphertext, const Key& key);
+    static Key GenerateKey();
+    static std::string Encrypt(const std::string& plaintext, const Key& key);
+    static std::string Decrypt(const std::string& ciphertext, const Key& key);
 };
 
 }  // namespace educational_crypto

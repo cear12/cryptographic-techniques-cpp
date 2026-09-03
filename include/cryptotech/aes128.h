@@ -20,22 +20,22 @@ namespace cryptotech {
 // repository README for the "do not use this for production" disclaimer.
 class Aes128 {
 public:
-    static constexpr std::size_t kBlockSize = 16;
-    static constexpr std::size_t kKeySize = 16;
-    using Block = std::array<std::uint8_t, kBlockSize>;
-    using Key = std::array<std::uint8_t, kKeySize>;
+  static constexpr std::size_t kBlockSize = 16;
+  static constexpr std::size_t kKeySize = 16;
+  using Block = std::array<std::uint8_t, kBlockSize>;
+  using Key = std::array<std::uint8_t, kKeySize>;
 
-    explicit Aes128(const Key& key);
+  explicit Aes128(const Key &key);
 
-    Block EncryptBlock(const Block& plaintext) const;
-    Block DecryptBlock(const Block& ciphertext) const;
+  Block EncryptBlock(const Block &plaintext) const;
+  Block DecryptBlock(const Block &ciphertext) const;
 
 private:
-    static constexpr int kRounds = 10;
-    // 4 words/round-key * (Nr+1) round keys, 4 bytes/word.
-    std::array<std::uint8_t, 4 * 4 * (kRounds + 1)> round_keys_{};
+  static constexpr int kRounds = 10;
+  // 4 words/round-key * (Nr+1) round keys, 4 bytes/word.
+  std::array<std::uint8_t, 4 * 4 * (kRounds + 1)> round_keys_{};
 
-    void ExpandKey(const Key& key);
+  void ExpandKey(const Key &key);
 };
 
-}  // namespace cryptotech
+} // namespace cryptotech

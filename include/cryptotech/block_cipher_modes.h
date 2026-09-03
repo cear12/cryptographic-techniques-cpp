@@ -9,9 +9,9 @@ namespace cryptotech {
 // alongside the ciphertext to decrypt it, and (for the authenticated mode)
 // a MAC tag.
 struct CipherResult {
-    std::vector<std::uint8_t> iv_or_nonce_;
-    std::vector<std::uint8_t> ciphertext_;
-    std::vector<std::uint8_t> tag_;  // only populated by encryptGcmStyle()
+  std::vector<std::uint8_t> iv_or_nonce_;
+  std::vector<std::uint8_t> ciphertext_;
+  std::vector<std::uint8_t> tag_; // only populated by encryptGcmStyle()
 };
 
 // Demonstrates three classic block-cipher modes of operation, all built on
@@ -32,26 +32,31 @@ struct CipherResult {
 // AEAD library for anything that matters.
 class BlockCipherModes {
 public:
-    static CipherResult EncryptCbcWithIv(const std::vector<std::uint8_t>& plaintext,
-                                          const std::vector<std::uint8_t>& key);
-    static std::vector<std::uint8_t> DecryptCbcWithIv(const CipherResult& in,
-                                                        const std::vector<std::uint8_t>& key);
+  static CipherResult
+  EncryptCbcWithIv(const std::vector<std::uint8_t> &plaintext,
+                   const std::vector<std::uint8_t> &key);
+  static std::vector<std::uint8_t>
+  DecryptCbcWithIv(const CipherResult &in,
+                   const std::vector<std::uint8_t> &key);
 
-    static CipherResult EncryptCtrWithNonce(const std::vector<std::uint8_t>& plaintext,
-                                             const std::vector<std::uint8_t>& key);
-    static std::vector<std::uint8_t> DecryptCtrWithNonce(const CipherResult& in,
-                                                           const std::vector<std::uint8_t>& key);
+  static CipherResult
+  EncryptCtrWithNonce(const std::vector<std::uint8_t> &plaintext,
+                      const std::vector<std::uint8_t> &key);
+  static std::vector<std::uint8_t>
+  DecryptCtrWithNonce(const CipherResult &in,
+                      const std::vector<std::uint8_t> &key);
 
-    static CipherResult EncryptGcmStyle(const std::vector<std::uint8_t>& plaintext,
-                                         const std::vector<std::uint8_t>& key,
-                                         const std::vector<std::uint8_t>& associated_data);
-    // Returns std::nullopt-like behavior via empty vector + `ok` flag: throws
-    // std::runtime_error if the authentication tag does not match, so a
-    // tampered ciphertext can never be silently "decrypted" into garbage
-    // plaintext.
-    static std::vector<std::uint8_t> DecryptGcmStyle(const CipherResult& in,
-                                                       const std::vector<std::uint8_t>& key,
-                                                       const std::vector<std::uint8_t>& associated_data);
+  static CipherResult
+  EncryptGcmStyle(const std::vector<std::uint8_t> &plaintext,
+                  const std::vector<std::uint8_t> &key,
+                  const std::vector<std::uint8_t> &associated_data);
+  // Returns std::nullopt-like behavior via empty vector + `ok` flag: throws
+  // std::runtime_error if the authentication tag does not match, so a
+  // tampered ciphertext can never be silently "decrypted" into garbage
+  // plaintext.
+  static std::vector<std::uint8_t>
+  DecryptGcmStyle(const CipherResult &in, const std::vector<std::uint8_t> &key,
+                  const std::vector<std::uint8_t> &associated_data);
 };
 
-}  // namespace cryptotech
+} // namespace cryptotech

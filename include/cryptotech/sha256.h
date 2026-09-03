@@ -19,31 +19,32 @@ namespace cryptotech {
 // "do not use this for production" disclaimer.
 class Sha256 {
 public:
-    static constexpr std::size_t kDigestSize = 32;
-    using Digest = std::array<std::uint8_t, kDigestSize>;
+  static constexpr std::size_t kDigestSize = 32;
+  using Digest = std::array<std::uint8_t, kDigestSize>;
 
-    Sha256();
+  Sha256();
 
-    void Update(const std::uint8_t* data, std::size_t length);
-    void Update(const std::vector<std::uint8_t>& data);
+  void Update(const std::uint8_t *data, std::size_t length);
+  void Update(const std::vector<std::uint8_t> &data);
 
-    // Finalizes and returns the digest. The object must not be reused
-    // after calling this.
-    Digest Finish();
+  // Finalizes and returns the digest. The object must not be reused
+  // after calling this.
+  Digest Finish();
 
-    static Digest Hash(const std::vector<std::uint8_t>& data);
-    static std::string ToHex(const Digest& digest);
+  static Digest Hash(const std::vector<std::uint8_t> &data);
+  static std::string ToHex(const Digest &digest);
 
 private:
-    void ProcessBlock(const std::uint8_t* block);
+  void ProcessBlock(const std::uint8_t *block);
 
-    std::array<std::uint32_t, 8> state_;
-    std::array<std::uint8_t, 64> buffer_{};
-    std::size_t buffer_length_ = 0;
-    std::uint64_t total_length_ = 0;
+  std::array<std::uint32_t, 8> state_;
+  std::array<std::uint8_t, 64> buffer_{};
+  std::size_t buffer_length_ = 0;
+  std::uint64_t total_length_ = 0;
 };
 
 // HMAC-SHA256(key, message) per RFC 2104.
-Sha256::Digest HmacSha256(const std::vector<std::uint8_t>& key, const std::vector<std::uint8_t>& message);
+Sha256::Digest HmacSha256(const std::vector<std::uint8_t> &key,
+                          const std::vector<std::uint8_t> &message);
 
-}  // namespace cryptotech
+} // namespace cryptotech

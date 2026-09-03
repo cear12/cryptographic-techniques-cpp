@@ -10,8 +10,10 @@ namespace educational_crypto {
 // included for the historical narrative, not as a real primitive.
 class VigenereCipher {
 public:
-    static std::string Encrypt(const std::string& plaintext, const std::string& key);
-    static std::string Decrypt(const std::string& ciphertext, const std::string& key);
+  static std::string Encrypt(const std::string &plaintext,
+                             const std::string &key);
+  static std::string Decrypt(const std::string &ciphertext,
+                             const std::string &key);
 };
 
-}  // namespace educational_crypto
+} // namespace educational_crypto

@@ -7,9 +7,9 @@
 namespace advanced_crypto {
 
 struct PasswordHash {
-    std::vector<std::uint8_t> salt_;
-    std::vector<std::uint8_t> hash_;
-    std::uint32_t iterations_ = 0;
+  std::vector<std::uint8_t> salt_;
+  std::vector<std::uint8_t> hash_;
+  std::uint32_t iterations_ = 0;
 };
 
 // Salted, iterated password hashing (PBKDF2-HMAC-SHA256 under the hood --
@@ -18,8 +18,9 @@ struct PasswordHash {
 // exactly what defeats precomputed rainbow-table attacks.
 class SaltTechniques {
 public:
-    static PasswordHash HashPassword(const std::string& password);
-    static bool VerifyPassword(const std::string& password, const PasswordHash& stored);
+  static PasswordHash HashPassword(const std::string &password);
+  static bool VerifyPassword(const std::string &password,
+                             const PasswordHash &stored);
 };
 
-}  // namespace advanced_crypto
+} // namespace advanced_crypto

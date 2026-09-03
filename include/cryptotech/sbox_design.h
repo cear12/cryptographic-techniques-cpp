@@ -11,31 +11,31 @@ namespace advanced_crypto {
 // ciphers all center on one.
 class SBoxDesign {
 public:
-    using SBox = std::array<std::uint8_t, 256>;
+  using SBox = std::array<std::uint8_t, 256>;
 
-    // A uniformly random bijective S-box (Fisher-Yates shuffle of the
-    // identity permutation). Cryptographically meaningful S-box design
-    // (like AES's, built from a GF(2^8) inverse + affine transform -- see
-    // cryptotech::Aes128) chooses structure deliberately to optimize the
-    // properties below; a *random* permutation is a useful baseline to
-    // measure real designs against, not a design recommendation itself.
-    static SBox GenerateRandomSbox();
+  // A uniformly random bijective S-box (Fisher-Yates shuffle of the
+  // identity permutation). Cryptographically meaningful S-box design
+  // (like AES's, built from a GF(2^8) inverse + affine transform -- see
+  // cryptotech::Aes128) chooses structure deliberately to optimize the
+  // properties below; a *random* permutation is a useful baseline to
+  // measure real designs against, not a design recommendation itself.
+  static SBox GenerateRandomSbox();
 
-    // Valid only for a bijective S-box: inverse[sbox[x]] == x for all x.
-    static SBox CreateInverseSbox(const SBox& sbox);
+  // Valid only for a bijective S-box: inverse[sbox[x]] == x for all x.
+  static SBox CreateInverseSbox(const SBox &sbox);
 
-    // Nonlinearity: how far the S-box's component Boolean functions are
-    // from any affine function, via the Walsh-Hadamard transform. Higher is
-    // better (more resistant to linear cryptanalysis). The theoretical
-    // maximum for a bijective 8-bit S-box is 112 -- AES's S-box achieves it.
-    static double CalculateNonlinearity(const SBox& sbox);
+  // Nonlinearity: how far the S-box's component Boolean functions are
+  // from any affine function, via the Walsh-Hadamard transform. Higher is
+  // better (more resistant to linear cryptanalysis). The theoretical
+  // maximum for a bijective 8-bit S-box is 112 -- AES's S-box achieves it.
+  static double CalculateNonlinearity(const SBox &sbox);
 
-    // Differential uniformity: the largest entry in the S-box's difference
-    // distribution table, i.e. max over nonzero input differences dx and
-    // all output differences dy of |{x : S(x) xor S(x xor dx) == dy}|.
-    // Lower is better (more resistant to differential cryptanalysis). AES's
-    // S-box achieves the optimal value of 4 for a bijective 8-bit S-box.
-    static int CalculateDifferentialUniformity(const SBox& sbox);
+  // Differential uniformity: the largest entry in the S-box's difference
+  // distribution table, i.e. max over nonzero input differences dx and
+  // all output differences dy of |{x : S(x) xor S(x xor dx) == dy}|.
+  // Lower is better (more resistant to differential cryptanalysis). AES's
+  // S-box achieves the optimal value of 4 for a bijective 8-bit S-box.
+  static int CalculateDifferentialUniformity(const SBox &sbox);
 };
 
-}  // namespace advanced_crypto
+} // namespace advanced_crypto

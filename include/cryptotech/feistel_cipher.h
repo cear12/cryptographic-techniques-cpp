@@ -21,13 +21,15 @@ namespace educational_crypto {
 // is NOT a secure cipher. See the repository README.
 class FeistelCipher {
 public:
-    static constexpr int kRounds = 16;
-    using Block = std::array<std::uint8_t, 8>;
-    using KeySchedule = std::array<std::uint32_t, kRounds>;
+  static constexpr int kRounds = 16;
+  using Block = std::array<std::uint8_t, 8>;
+  using KeySchedule = std::array<std::uint32_t, kRounds>;
 
-    static KeySchedule GenerateKeySchedule(const std::vector<std::uint8_t>& master_key);
-    static Block Encrypt(const Block& plaintext, const KeySchedule& key_schedule);
-    static Block Decrypt(const Block& ciphertext, const KeySchedule& key_schedule);
+  static KeySchedule
+  GenerateKeySchedule(const std::vector<std::uint8_t> &master_key);
+  static Block Encrypt(const Block &plaintext, const KeySchedule &key_schedule);
+  static Block Decrypt(const Block &ciphertext,
+                       const KeySchedule &key_schedule);
 };
 
-}  // namespace educational_crypto
+} // namespace educational_crypto

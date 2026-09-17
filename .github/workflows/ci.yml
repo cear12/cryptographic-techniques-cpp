@@ -2,38 +2,20 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
-  build-and-run:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-
-    runs-on: ${{ matrix.os }}
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Configure
-        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-
-      - name: Build
-        run: cmake --build build --config Release
-
-      # No Catch2 suite in this repo (see README) -- the demo itself runs
-      # known-answer tests against each primitive at startup and exits
-      # non-zero if any of them fail, so running it *is* the smoke test.
-      - name: Run demo (includes built-in known-answer self-checks)
-        shell: bash
-        run: |
-          if [ -f build/examples/Release/crypto_demo.exe ]; then
-            build/examples/Release/crypto_demo.exe
-          elif [ -f build/examples/crypto_demo ]; then
-            build/examples/crypto_demo
-          else
-            echo "crypto_demo binary not found" && exit 1
-          fi
+  cmake:
+    # Needs examples/CMakeLists.txt to register the demo as a test:
+    #   add_test(NAME crypto_demo COMMAND crypto_demo)
+    # and enable_testing() in the root CMakeLists.txt.
+    uses: cear12/ci-workflows/.github/workflows/cmake.yml@v1

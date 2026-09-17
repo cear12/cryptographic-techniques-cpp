@@ -1,5 +1,6 @@
 #include "cryptotech/feistel_cipher.h"
 
+#include <bit>
 #include <stdexcept>
 
 namespace educational_crypto {
@@ -7,7 +8,9 @@ namespace educational_crypto {
 namespace {
 
 std::uint32_t Rotl32(std::uint32_t x, int n) {
-  return (x << n) | (x >> (32 - n));
+  // Was (x << n) | (x >> (32 - n)): for n == 0 that shifts by 32, which is UB
+  // (UBSan: "shift exponent 32 is too large"). std::rotl handles every n.
+  return std::rotl(x, n);
 }
 
 std::uint32_t BytesToWord(const std::uint8_t *b) {

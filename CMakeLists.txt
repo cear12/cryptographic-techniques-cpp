@@ -9,6 +9,8 @@ endif()
 
 option(CRYPTOTECH_BUILD_EXAMPLES "Build examples/" ON)
 
+enable_testing()
+
 add_library(cryptotech STATIC
     src/sha256.cpp
     src/aes128.cpp
